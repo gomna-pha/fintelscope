@@ -1,82 +1,92 @@
 
-import React, { useState, useEffect } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
+import { useState, useEffect } from 'react'
+import { Brain, Target, Zap, TrendingUp } from 'lucide-react'
+
+interface ModelData {
+  model: string
+  accuracy: number
+  prediction: string
+}
 
 const PredictionModels = () => {
-  const [predictions, setPredictions] = useState([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [models, setModels] = useState<ModelData[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const fetchPredictions = async () => {
-      setIsLoading(true)
-      
-      // Simulate AI model predictions
-      await new Promise(resolve => setTimeout(resolve, 1200))
-      
-      const modelPredictions = [
-        { model: 'LSTM Neural Network', accuracy: 87.5, prediction: 'Bullish' },
-        { model: 'Random Forest', accuracy: 82.1, prediction: 'Neutral' },
-        { model: 'XGBoost', accuracy: 85.3, prediction: 'Bullish' },
-        { model: 'Transformer', accuracy: 89.2, prediction: 'Bullish' },
-        { model: 'SVM', accuracy: 78.9, prediction: 'Bearish' }
-      ]
-      
-      setPredictions(modelPredictions)
-      setIsLoading(false)
-    }
-
-    fetchPredictions()
+    // Simulate API call
+    const mockModels: ModelData[] = [
+      { model: 'LSTM Neural Network', accuracy: 87.2, prediction: 'Bullish' },
+      { model: 'Random Forest', accuracy: 82.5, prediction: 'Neutral' },
+      { model: 'Transformer Model', accuracy: 91.3, prediction: 'Bullish' },
+    ]
+    
+    setTimeout(() => {
+      setModels(mockModels)
+      setLoading(false)
+    }, 1200)
   }, [])
 
-  if (isLoading) {
+  if (loading) {
     return (
-      <div className="bg-white p-6 rounded-lg shadow">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">AI Model Predictions</h3>
+      <div className="bg-white rounded-lg shadow p-6">
         <div className="animate-pulse">
-          <div className="h-64 bg-gray-200 rounded"></div>
+          <div className="h-4 bg-gray-200 rounded w-1/3 mb-4"></div>
+          <div className="space-y-3">
+            <div className="h-20 bg-gray-200 rounded"></div>
+            <div className="h-20 bg-gray-200 rounded"></div>
+            <div className="h-20 bg-gray-200 rounded"></div>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow">
-      <h3 className="text-lg font-medium text-gray-900 mb-6">AI Model Predictions</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <h4 className="text-md font-medium text-gray-700 mb-4">Model Accuracy</h4>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={predictions}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="model" angle={-45} textAnchor="end" height={100} />
-              <YAxis />
-              <Tooltip />
-              <Bar dataKey="accuracy" fill="#3b82f6" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        
-        <div>
-          <h4 className="text-md font-medium text-gray-700 mb-4">Current Predictions</h4>
-          <div className="space-y-3">
-            {predictions.map((pred, index) => (
-              <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <div>
-                  <p className="font-medium text-sm">{pred.model}</p>
-                  <p className="text-xs text-gray-500">Accuracy: {pred.accuracy}%</p>
-                </div>
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  pred.prediction === 'Bullish' ? 'bg-green-100 text-green-800' :
-                  pred.prediction === 'Bearish' ? 'bg-red-100 text-red-800' :
-                  'bg-yellow-100 text-yellow-800'
+    <div className="bg-white rounded-lg shadow p-6">
+      <div className="flex items-center mb-6">
+        <Brain className="h-6 w-6 text-blue-600 mr-2" />
+        <h3 className="text-lg font-medium text-gray-900">AI Prediction Models</h3>
+      </div>
+
+      <div className="space-y-4">
+        {models.map((model, index) => (
+          <div key={index} className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-2">
+              <h4 className="font-medium text-gray-900">{model.model}</h4>
+              <div className="flex items-center text-sm text-gray-500">
+                <Target className="h-4 w-4 mr-1" />
+                Accuracy: {model.accuracy}%
+              </div>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <span className="text-sm text-gray-500 mr-2">Prediction:</span>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                  model.prediction === 'Bullish' 
+                    ? 'bg-green-100 text-green-800' 
+                    : model.prediction === 'Bearish'
+                    ? 'bg-red-100 text-red-800'
+                    : 'bg-gray-100 text-gray-800'
                 }`}>
-                  {pred.prediction}
+                  {model.prediction}
                 </span>
               </div>
-            ))}
+              
+              <div className="flex items-center text-sm text-blue-600">
+                <TrendingUp className="h-4 w-4 mr-1" />
+                Active
+              </div>
+            </div>
           </div>
-        </div>
+        ))}
+      </div>
+
+      <div className="mt-6 flex justify-center">
+        <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+          <Zap className="h-4 w-4 mr-2" />
+          Run New Prediction
+        </button>
       </div>
     </div>
   )

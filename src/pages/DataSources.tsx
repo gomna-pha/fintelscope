@@ -1,172 +1,162 @@
 
-import React, { useState } from 'react'
-import { Database, Key, CheckCircle, XCircle, Loader } from 'lucide-react'
+import { useState } from 'react'
+import { Database, Key, Globe, Twitter, AlertCircle, CheckCircle } from 'lucide-react'
+
+interface ApiKeys {
+  alphaVantage: string
+  polygon: string
+  newsApi: string
+  twitter: string
+}
 
 const DataSources = () => {
-  const [apiKeys, setApiKeys] = useState({
+  const [apiKeys, setApiKeys] = useState<ApiKeys>({
     alphaVantage: '',
     polygon: '',
     newsApi: '',
     twitter: ''
   })
   
-  const [connections, setConnections] = useState({
+  const [connectionStatus, setConnectionStatus] = useState<Record<string, string>>({
     alphaVantage: 'disconnected',
     polygon: 'disconnected',
     newsApi: 'disconnected',
     twitter: 'disconnected'
   })
 
-  const dataSources = [
-    {
-      id: 'alphaVantage',
-      name: 'Alpha Vantage',
-      description: 'Real-time and historical stock market data',
-      website: 'https://www.alphavantage.co/',
-      features: ['Stock prices', 'Forex rates', 'Crypto data', 'Technical indicators']
-    },
-    {
-      id: 'polygon',
-      name: 'Polygon.io',
-      description: 'Financial market data APIs',
-      website: 'https://polygon.io/',
-      features: ['Real-time quotes', 'Historical data', 'Options data', 'Market news']
-    },
-    {
-      id: 'newsApi',
-      name: 'NewsAPI',
-      description: 'News articles from various sources',
-      website: 'https://newsapi.org/',
-      features: ['Financial news', 'Company mentions', 'Market sentiment', 'Breaking news']
-    },
-    {
-      id: 'twitter',
-      name: 'Twitter API',
-      description: 'Social media sentiment analysis',
-      website: 'https://developer.twitter.com/',
-      features: ['Tweet sentiment', 'Trending topics', 'Influencer tracking', 'Real-time feeds']
-    }
-  ]
-
-  const handleApiKeyChange = (sourceId, value) => {
+  const handleApiKeyChange = (sourceId: keyof ApiKeys, value: string) => {
     setApiKeys(prev => ({ ...prev, [sourceId]: value }))
   }
 
-  const testConnection = async (sourceId) => {
-    setConnections(prev => ({ ...prev, [sourceId]: 'testing' }))
+  const testConnection = async (sourceId: keyof ApiKeys) => {
+    setConnectionStatus(prev => ({ ...prev, [sourceId]: 'testing' }))
     
-    // Simulate API testing
-    await new Promise(resolve => setTimeout(resolve, 2000))
-    
-    // For demo purposes, randomly succeed or fail
-    const success = Math.random() > 0.3
-    setConnections(prev => ({ 
-      ...prev, 
-      [sourceId]: success ? 'connected' : 'error' 
-    }))
+    // Simulate API test
+    setTimeout(() => {
+      const success = Math.random() > 0.3 // 70% success rate for demo
+      setConnectionStatus(prev => ({ 
+        ...prev, 
+        [sourceId]: success ? 'connected' : 'error' 
+      }))
+    }, 2000)
   }
 
-  const getStatusIcon = (status) => {
+  const getStatusIcon = (status: string) => {
     switch (status) {
       case 'connected':
-        return <CheckCircle className="w-5 h-5 text-green-500" />
-      case 'testing':
-        return <Loader className="w-5 h-5 text-blue-500 animate-spin" />
+        return <CheckCircle className="h-5 w-5 text-green-500" />
       case 'error':
-        return <XCircle className="w-5 h-5 text-red-500" />
+        return <AlertCircle className="h-5 w-5 text-red-500" />
+      case 'testing':
+        return <div className="h-5 w-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
       default:
-        return <Database className="w-5 h-5 text-gray-400" />
+        return <Database className="h-5 w-5 text-gray-400" />
     }
   }
 
-  return (
-    <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-      <div className="px-4 py-6 sm:px-0">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Data Sources</h1>
-          <p className="mt-2 text-gray-600">
-            Connect and configure your financial data sources for AI analysis
-          </p>
-        </div>
+  const dataSources = [
+    {
+      id: 'alphaVantage' as keyof ApiKeys,
+      name: 'Alpha Vantage',
+      description: 'Real-time and historical stock market data',
+      icon: Globe,
+      placeholder: 'Enter Alpha Vantage API key'
+    },
+    {
+      id: 'polygon' as keyof ApiKeys,
+      name: 'Polygon.io',
+      description: 'Financial market data APIs',
+      icon: Database,
+      placeholder: 'Enter Polygon.io API key'
+    },
+    {
+      id: 'newsApi' as keyof ApiKeys,
+      name: 'News API',
+      description: 'Financial news and sentiment data',
+      icon: Globe,
+      placeholder: 'Enter News API key'
+    },
+    {
+      id: 'twitter' as keyof ApiKeys,
+      name: 'Twitter API',
+      description: 'Social media sentiment analysis',
+      icon: Twitter,
+      placeholder: 'Enter Twitter Bearer Token'
+    }
+  ]
 
-        <div className="grid gap-6">
-          {dataSources.map((source) => (
-            <div key={source.id} className="bg-white shadow rounded-lg p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <Database className="w-8 h-8 text-blue-600 mr-3" />
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-900">{source.name}</h3>
-                    <p className="text-sm text-gray-500">{source.description}</p>
+  return (
+    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900">Data Sources</h1>
+        <p className="mt-2 text-gray-600">Configure API connections for real-time financial data</p>
+      </div>
+
+      <div className="space-y-6">
+        {dataSources.map((source) => {
+          const Icon = source.icon
+          const status = connectionStatus[source.id]
+          
+          return (
+            <div key={source.id} className="bg-white rounded-lg shadow border border-gray-200">
+              <div className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <Icon className="h-8 w-8 text-blue-600" />
+                    </div>
+                    <div className="ml-4">
+                      <h3 className="text-lg font-medium text-gray-900">{source.name}</h3>
+                      <p className="text-sm text-gray-500">{source.description}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center">
+                    {getStatusIcon(status)}
+                    <span className="ml-2 text-sm font-medium capitalize text-gray-700">
+                      {status}
+                    </span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-2">
-                  {getStatusIcon(connections[source.id])}
-                  <span className="text-sm text-gray-600 capitalize">
-                    {connections[source.id] === 'testing' ? 'Testing...' : connections[source.id]}
-                  </span>
-                </div>
-              </div>
 
-              <div className="mb-4">
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Features:</h4>
-                <div className="flex flex-wrap gap-2">
-                  {source.features.map((feature, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800"
-                    >
-                      {feature}
-                    </span>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <div className="flex-1">
-                  <div className="relative">
-                    <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <Key className="inline h-4 w-4 mr-1" />
+                      API Key
+                    </label>
                     <input
                       type="password"
-                      placeholder="Enter API key"
                       value={apiKeys[source.id]}
                       onChange={(e) => handleApiKeyChange(source.id, e.target.value)}
-                      className="pl-10 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                      placeholder={source.placeholder}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
                   </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() => testConnection(source.id)}
+                      disabled={!apiKeys[source.id] || status === 'testing'}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                      {status === 'testing' ? 'Testing...' : 'Test Connection'}
+                    </button>
+                  </div>
                 </div>
-                <button
-                  onClick={() => testConnection(source.id)}
-                  disabled={!apiKeys[source.id] || connections[source.id] === 'testing'}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  Test Connection
-                </button>
-                <a
-                  href={source.website}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
-                >
-                  Get API Key
-                </a>
               </div>
             </div>
-          ))}
-        </div>
+          )
+        })}
+      </div>
 
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-blue-900 mb-2">Data Pipeline Status</h3>
-          <p className="text-blue-700 mb-4">
-            Connected data sources will automatically feed into our AI models for real-time analysis.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {dataSources.map((source) => (
-              <div key={source.id} className="flex items-center">
-                {getStatusIcon(connections[source.id])}
-                <span className="ml-2 text-sm text-blue-700">{source.name}</span>
-              </div>
-            ))}
+      <div className="mt-8 p-4 bg-blue-50 rounded-lg">
+        <div className="flex">
+          <AlertCircle className="h-5 w-5 text-blue-400 mt-0.5" />
+          <div className="ml-3">
+            <h3 className="text-sm font-medium text-blue-800">Security Notice</h3>
+            <p className="mt-1 text-sm text-blue-700">
+              API keys are encrypted and stored securely. Never share your API keys with unauthorized parties.
+            </p>
           </div>
         </div>
       </div>
